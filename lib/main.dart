@@ -7,7 +7,7 @@ import 'package:mic_stream/mic_stream.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application. Test
+  // This widget is the root of your application. asfdsdaf
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -70,14 +70,14 @@ int temp2;
       //_counter++;
 
       if (state==false) {
-        stream = microphone(sampleRate: 44100, audioSource: AudioSource.MIC, channelConfig: ChannelConfig.CHANNEL_IN_STEREO, audioFormat: AudioFormat.ENCODING_PCM_16BIT);
-
+       stream = microphone(sampleRate: 44100, audioSource: AudioSource.MIC, channelConfig: ChannelConfig.CHANNEL_IN_STEREO, audioFormat: AudioFormat.ENCODING_PCM_16BIT);
        listener = stream.listen((samples) => currentSamples=samples );
+
 //print(currentSamples);
-         test = ' running';
+        test = ' running';
         state = true;
       }
-
+// HALLO
       else if(state==true) {
              listener.cancel();
 

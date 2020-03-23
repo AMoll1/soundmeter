@@ -70,14 +70,14 @@ int temp2;
       //_counter++;
 
       if (state==false) {
-        stream = microphone(sampleRate: 44100, audioSource: AudioSource.MIC, channelConfig: ChannelConfig.CHANNEL_IN_STEREO, audioFormat: AudioFormat.ENCODING_PCM_16BIT);
-
+       stream = microphone(sampleRate: 44100, audioSource: AudioSource.MIC, channelConfig: ChannelConfig.CHANNEL_IN_STEREO, audioFormat: AudioFormat.ENCODING_PCM_16BIT);
        listener = stream.listen((samples) => currentSamples=samples );
+
 //print(currentSamples);
-         test = ' running';
+        test = ' running';
         state = true;
       }
-
+// HALLO
       else if(state==true) {
              listener.cancel();
 

@@ -78,7 +78,7 @@ int temp2;
         test = ' running';
         state = true;
       }
-// HALLO
+//DELETE ME
       else if(state==true) {
              listener.cancel();
 

@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:mic_stream/mic_stream.dart';
-//import 'package:audio_streams/audio_streams.dart';
+import 'package:audio_streams/audio_streams.dart';
 import 'dart:io' show Platform;
 
 void main() => runApp(MyApp());
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Soundmeter'),
     );
   }
 }
@@ -59,6 +59,10 @@ class _MyHomePageState extends State<MyHomePage> {
   int temp = 0;
   List<int> currentSamples;
   String test = 'not running';
+  AudioController controller; //IOS
+
+
+
 
 int temp2;
   void _incrementCounter() {
@@ -73,6 +77,7 @@ int temp2;
       //_counter++;
 
 
+//16 bit pcm => max.value = 2^16/2
       if (Platform.isAndroid){
 
         if (state == false) {
@@ -118,6 +123,16 @@ int temp2;
 
     }else if (Platform.isIOS) {
         // iOS-specific code
+
+
+
+
+
+
+
+
+
+
       }
 
 

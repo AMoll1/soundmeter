@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:mic_stream/mic_stream.dart';
-import 'package:audio_streams/audio_streams.dart';
+//import 'package:audio_streams/audio_streams.dart';
 import 'dart:io' show Platform;
 
 void main() => runApp(MyApp());
@@ -62,6 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 int temp2;
   void _incrementCounter() {
+
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -73,6 +74,7 @@ int temp2;
 
 
       if (Platform.isAndroid){
+
         if (state == false) {
           stream = microphone(sampleRate: 44100,
               audioSource: AudioSource.MIC,
@@ -83,9 +85,7 @@ int temp2;
 //print(currentSamples);
           test = ' running';
           state = true;
-        }
-//DELETE ME
-        else if (state == true) {
+        } else if (state == true) {
           listener.cancel();
 
           if (currentSamples.isNotEmpty) {
@@ -112,6 +112,9 @@ int temp2;
           test = 'not running';
           state = false;
         }
+
+
+
 
     }else if (Platform.isIOS) {
         // iOS-specific code

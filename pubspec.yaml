@@ -23,6 +23,7 @@ dependencies:
   mic_stream: ^0.2.0+2
   permission: ^0.1.1
   audio_streams: ^1.0.0+2
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2

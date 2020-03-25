@@ -6,6 +6,7 @@ import 'package:mic_stream/mic_stream.dart';
 import 'package:audio_streams/audio_streams.dart';
 import 'dart:io' show Platform;
 
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.pink,
       ),
       home: MyHomePage(title: 'Soundmeter'),
     );
@@ -50,22 +51,50 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+
+
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  int _result;
   bool state = false;
-  bool isRecording = false;
+  bool _isRecording = false;
   Stream<List<int>> stream;
   StreamSubscription<List<int>> listener;
-  int temp = 0;
   List<int> currentSamples;
-  String test = 'not running';
+  String _status;
   AudioController controller; //IOS
 
 
 
 
-int temp2;
-  void _incrementCounter() {
+
+  @override
+  void initState() {
+    super.initState();
+     _result = 0;
+    _status = "not running";
+
+    if (Platform.isIOS) {
+      controller = new AudioController(CommonFormat.Int16, 44100, 1, true); //16000 -> 44100  //16 bit pcm => max.value = 2^16/2
+      initAudio();
+    }
+
+    if (Platform.isAndroid){
+      stream = microphone(sampleRate: 44100,
+          audioSource: AudioSource.MIC,
+          channelConfig: ChannelConfig.CHANNEL_IN_MONO,  //or stereo??? pls help
+          audioFormat: AudioFormat.ENCODING_PCM_16BIT); //16 bit pcm => max.value = 2^16/2
+
+    }
+  }
+
+
+  Future<void> initAudio() async {
+    await controller.intialize();
+  }
+
+
+
+  void _startMeasurement() {
 
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -74,47 +103,35 @@ int temp2;
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
 
-      //_counter++;
 
 
-//16 bit pcm => max.value = 2^16/2
       if (Platform.isAndroid){
-
         if (state == false) {
-          stream = microphone(sampleRate: 44100,
-              audioSource: AudioSource.MIC,
-              channelConfig: ChannelConfig.CHANNEL_IN_STEREO,
-              audioFormat: AudioFormat.ENCODING_PCM_16BIT);
           listener = stream.listen((samples) => currentSamples = samples);
 
-//print(currentSamples);
-          test = ' running';
+          _status = ' running';
           state = true;
+
         } else if (state == true) {
           listener.cancel();
 
           if (currentSamples.isNotEmpty) {
             currentSamples.sort();
-
             //  temp2 =  currentSamples.reduce(max);
 
             if (currentSamples.first.abs() >= currentSamples.last.abs()) {
-              temp2 = currentSamples.first.abs();
+              _result = currentSamples.first.abs();
             } else {
-              temp2 = currentSamples.last.abs();
+              _result = currentSamples.last.abs();
             }
 
             print(currentSamples);
-            print(temp2);
+            print(_result);
 
             // temp2=currentSamples.last;
-            _counter = temp2;
-            currentSamples = [];
-            print(currentSamples);
+            _result = temp2;
           }
-
-
-          test = 'not running';
+          _status = 'not running';
           state = false;
         }
 
@@ -122,21 +139,16 @@ int temp2;
 
 
     }else if (Platform.isIOS) {
-        // iOS-specific code
-
-
-
-
-
-
-
-
-
-
+        // iOS-specific code -> braucht kein Mensch
+        controller.startAudioStream().listen((samples) => currentSamples = samples);
       }
 
 
-    });
+    }
+    );
+
+
+    currentSamples = [];
   }
 
   @override
@@ -174,10 +186,10 @@ int temp2;
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              test,
+              _status,
             ),
             Text(
-              '$_counter',
+              '$_result',
               style: Theme.of(context).textTheme.display1,
             ),
 
@@ -185,8 +197,8 @@ int temp2;
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        onPressed: _startMeasurement,
+        tooltip: 'Start',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );

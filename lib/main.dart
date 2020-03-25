@@ -55,12 +55,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _result;
-  bool state = false;
-  bool _isRecording = false;
+  bool isRecording;
   Stream<List<int>> stream;
   StreamSubscription<List<int>> listener;
   List<int> currentSamples;
-  String _status;
+  String status;
   AudioController controller; //IOS
 
 
@@ -70,8 +69,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-     _result = 0;
-    _status = "not running";
+    _result = 0;
+    status = "not running";
+    currentSamples = [];
+    isRecording = false;
 
     if (Platform.isIOS) {
       controller = new AudioController(CommonFormat.Int16, 44100, 1, true); //16000 -> 44100  //16 bit pcm => max.value = 2^16/2
@@ -84,6 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
           channelConfig: ChannelConfig.CHANNEL_IN_MONO,  //or stereo??? pls help
           audioFormat: AudioFormat.ENCODING_PCM_16BIT); //16 bit pcm => max.value = 2^16/2
 
+
     }
   }
 
@@ -92,9 +94,75 @@ class _MyHomePageState extends State<MyHomePage> {
     await controller.intialize();
   }
 
+  Future<void> deInitAudio() async {
+    await controller.stopAudioStream();
+  }
+
+
+  int calculate(List<int> currentSamples) {
+
+    if (currentSamples.isNotEmpty) {
+      currentSamples.sort();
+      //  temp2 =  currentSamples.reduce(max);  //funktioniert irgendwie nicht, angeblich schneller
+
+      if (currentSamples.first.abs() >= currentSamples.last.abs()) {
+        _result = currentSamples.first.abs();
+      } else {
+        _result = currentSamples.last.abs();
+      }
+      print(currentSamples);
+      print(_result);
+    }
+
+    return _result;
+  }
+
 
 
   void _startMeasurement() {
+
+
+
+
+    if (isRecording == false) {
+
+      if (Platform.isAndroid) {
+        print("test");
+
+if(listener == null){
+  listener = stream.listen((samples) => currentSamples = samples);
+
+}else if(listener.isPaused){ //wegen cancel fehler
+          listener.resume();
+        }
+
+      }else if (Platform.isIOS) {  // iOS-specific code -> braucht kein Mensch
+        controller.startAudioStream().listen((samples) => currentSamples = samples);
+      }
+      isRecording = true;
+
+
+
+
+    } else if (isRecording == true) {
+
+      if (Platform.isAndroid) {
+      //listener.cancel();  Fehler!!
+      listener.pause();
+      }else if (Platform.isIOS) {  // iOS-specific code -> braucht kein Mensch
+        deInitAudio();
+      }
+
+
+      isRecording = false;
+      //currentSamples = [];
+    }
+
+
+
+
+
+
 
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -104,51 +172,16 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
 
 
-
-      if (Platform.isAndroid){
-        if (state == false) {
-          listener = stream.listen((samples) => currentSamples = samples);
-
-          _status = ' running';
-          state = true;
-
-        } else if (state == true) {
-          listener.cancel();
-
-          if (currentSamples.isNotEmpty) {
-            currentSamples.sort();
-            //  temp2 =  currentSamples.reduce(max);
-
-            if (currentSamples.first.abs() >= currentSamples.last.abs()) {
-              _result = currentSamples.first.abs();
-            } else {
-              _result = currentSamples.last.abs();
-            }
-
-            print(currentSamples);
-            print(_result);
-
-            // temp2=currentSamples.last;
-            _result = temp2;
-          }
-          _status = 'not running';
-          state = false;
-        }
-
-
-
-
-    }else if (Platform.isIOS) {
-        // iOS-specific code -> braucht kein Mensch
-        controller.startAudioStream().listen((samples) => currentSamples = samples);
-      }
+      if(isRecording) status = "running";
+      if(!isRecording) status = "not running";
+      _result = calculate(currentSamples);
 
 
     }
     );
 
 
-    currentSamples = [];
+
   }
 
   @override
@@ -186,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              _status,
+              status,
             ),
             Text(
               '$_result',

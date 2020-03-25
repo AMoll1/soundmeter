@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:mic_stream/mic_stream.dart';
+import 'package:audio_streams/audio_streams.dart';
+import 'dart:io' show Platform;
 
 void main() => runApp(MyApp());
 
@@ -67,45 +69,52 @@ int temp2;
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
 
-
       //_counter++;
 
-      if (state==false) {
-       stream = microphone(sampleRate: 44100, audioSource: AudioSource.MIC, channelConfig: ChannelConfig.CHANNEL_IN_STEREO, audioFormat: AudioFormat.ENCODING_PCM_16BIT);
-       listener = stream.listen((samples) => currentSamples=samples );
+
+      if (Platform.isAndroid){
+        if (state == false) {
+          stream = microphone(sampleRate: 44100,
+              audioSource: AudioSource.MIC,
+              channelConfig: ChannelConfig.CHANNEL_IN_STEREO,
+              audioFormat: AudioFormat.ENCODING_PCM_16BIT);
+          listener = stream.listen((samples) => currentSamples = samples);
 
 //print(currentSamples);
-        test = ' running';
-        state = true;
-      }
+          test = ' running';
+          state = true;
+        }
 //DELETE ME
-      else if(state==true) {
-             listener.cancel();
+        else if (state == true) {
+          listener.cancel();
 
-             if (currentSamples.isNotEmpty){
-              currentSamples.sort();
+          if (currentSamples.isNotEmpty) {
+            currentSamples.sort();
 
-          //  temp2 =  currentSamples.reduce(max);
+            //  temp2 =  currentSamples.reduce(max);
 
-              if(currentSamples.first.abs()>= currentSamples.last.abs()) {
-                temp2 = currentSamples.first.abs();
-              }else {
-                temp2 = currentSamples.last.abs();
-              }
+            if (currentSamples.first.abs() >= currentSamples.last.abs()) {
+              temp2 = currentSamples.first.abs();
+            } else {
+              temp2 = currentSamples.last.abs();
+            }
 
-print(currentSamples);
-print(temp2);
+            print(currentSamples);
+            print(temp2);
 
- // temp2=currentSamples.last;
-              _counter = temp2;
-              currentSamples = [];
-              print(currentSamples);
-             }
+            // temp2=currentSamples.last;
+            _counter = temp2;
+            currentSamples = [];
+            print(currentSamples);
+          }
 
 
+          test = 'not running';
+          state = false;
+        }
 
-              test = 'not running';
-             state = false;
+    }else if (Platform.isIOS) {
+        // iOS-specific code
       }
 
 

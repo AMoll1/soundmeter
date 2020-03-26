@@ -61,8 +61,18 @@ class _MyHomePageState extends State<MyHomePage> {
   List<int> currentSamples;
   String status;
   AudioController controller; //IOS
+  List<int> currentSamples2 = [];
 
 
+
+  Future resultStream(List<int> test) async {
+
+    for (int i = 0; i < test.length; i++) {
+      var value = test[i];
+      currentSamples2.add(value);
+    }
+    print(currentSamples2.length);
+  }
 
 
 
@@ -113,7 +123,11 @@ class _MyHomePageState extends State<MyHomePage> {
       print(currentSamples);
       print(_result);
     }
-
+    print("laenge= ");
+    print(currentSamples.length);
+    print("dauer");
+  print(currentSamples.length/44100);
+  currentSamples2 =[];
     return _result;
   }
 
@@ -127,10 +141,19 @@ class _MyHomePageState extends State<MyHomePage> {
     if (isRecording == false) {
 
       if (Platform.isAndroid) {
-        print("test");
 
 if(listener == null){
-  listener = stream.listen((samples) => currentSamples = samples);
+  listener = stream.listen((samples){
+currentSamples=samples;
+resultStream(currentSamples);
+
+  });
+
+
+
+
+
+
 
 }else if(listener.isPaused){ //wegen cancel fehler
           listener.resume();
@@ -148,6 +171,9 @@ if(listener == null){
 
       if (Platform.isAndroid) {
       //listener.cancel();  Fehler!!
+        print("currentSamples2");
+        print(currentSamples2);
+       // currentSamples2 = [];
       listener.pause();
       }else if (Platform.isIOS) {  // iOS-specific code -> braucht kein Mensch
         deInitAudio();
@@ -174,7 +200,7 @@ if(listener == null){
 
       if(isRecording) status = "running";
       if(!isRecording) status = "not running";
-      _result = calculate(currentSamples);
+      _result = calculate(currentSamples2);
 
 
     }

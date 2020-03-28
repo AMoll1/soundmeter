@@ -150,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
         if (listener == null) {
           listener = stream.listen((samples) {
-            appendCurrent(samples);
+            if(isRecording)appendCurrent(samples);
           },
           onError: (err){
             print("error in der Streamsubscription");
@@ -252,7 +252,8 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _startMeasurement,
         tooltip: 'Start',
         child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

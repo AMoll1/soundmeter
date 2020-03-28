@@ -6,7 +6,6 @@ import 'package:mic_stream/mic_stream.dart';
 import 'package:audio_streams/audio_streams.dart';
 import 'dart:io' show Platform;
 
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -51,8 +50,6 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-
-
 class _MyHomePageState extends State<MyHomePage> {
   int _result;
   bool isRecording;
@@ -61,17 +58,16 @@ class _MyHomePageState extends State<MyHomePage> {
   List<int> currentSamples;
   String status;
   AudioController controller; //IOS
-  List<int> currentSamples2 = [];
+  List<int> finalSamples = [];
+  DateTime startTime;
 
 
 
-  Future resultStream(List<int> test) async {
-
+  Future appendCurrent(List<int> test) async {
+    //await Future.delayed(Duration(seconds: 1)); //Mock delay
     for (int i = 0; i < test.length; i++) {
-      var value = test[i];
-      currentSamples2.add(value);
+      finalSamples.add(test[i]);
     }
-    print(currentSamples2.length);
   }
 
 
@@ -81,114 +77,118 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _result = 0;
     status = "not running";
-    currentSamples = [];
     isRecording = false;
+    finalSamples = [];
 
     if (Platform.isIOS) {
-      controller = new AudioController(CommonFormat.Int16, 44100, 1, true); //16000 -> 44100  //16 bit pcm => max.value = 2^16/2
+      controller = new AudioController(CommonFormat.Int16, 44100, 1,
+          true); //16000 -> 44100  //16 bit pcm => max.value = 2^16/2
       initAudio();
     }
 
-    if (Platform.isAndroid){
-      stream = microphone(sampleRate: 44100,
+    if (Platform.isAndroid) {
+
+      stream = microphone(
+          sampleRate: 44100,
           audioSource: AudioSource.MIC,
-          channelConfig: ChannelConfig.CHANNEL_IN_MONO,  //or stereo??? pls help
-          audioFormat: AudioFormat.ENCODING_PCM_16BIT); //16 bit pcm => max.value = 2^16/2
-
-
+          channelConfig: ChannelConfig.CHANNEL_IN_MONO, //or stereo??? pls help
+          audioFormat: AudioFormat
+              .ENCODING_PCM_16BIT); //16 bit pcm => max.value = 2^16/2
+      stream.asBroadcastStream();
     }
   }
+
 
 
   Future<void> initAudio() async {
     await controller.intialize();
   }
 
+
+
+
   Future<void> deInitAudio() async {
     await controller.stopAudioStream();
   }
 
 
-  int calculate(List<int> currentSamples) {
 
-    if (currentSamples.isNotEmpty) {
-      currentSamples.sort();
-      //  temp2 =  currentSamples.reduce(max);  //funktioniert irgendwie nicht, angeblich schneller
 
-      if (currentSamples.first.abs() >= currentSamples.last.abs()) {
-        _result = currentSamples.first.abs();
-      } else {
-        _result = currentSamples.last.abs();
-      }
-      print(currentSamples);
-      print(_result);
-    }
-    print("laenge= ");
-    print(currentSamples.length);
-    print("dauer");
-  print(currentSamples.length/44100);
-  currentSamples2 =[];
-    return _result;
+
+  @override
+  void dispose() {
+    listener.cancel();
+    controller.dispose();
+    // WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
 
 
+  int calculate(List<int> finalSamples) {
+    if (finalSamples.isNotEmpty) {
+      // finalSamples.sort();
+
+      if (finalSamples.reduce(max).abs() >= finalSamples.reduce(min)) {
+        _result = finalSamples.reduce(max).abs();
+      } else {
+        _result = finalSamples.reduce(min);
+      }
+
+    }else _result = 0;
+
+    print("laenge= ");
+    print(finalSamples.length);
+    print("dauer");
+    print(finalSamples.length / 44100);
+    return _result;
+  }
+
   void _startMeasurement() {
-
-
-
-
-    if (isRecording == false) {
-
+    if (!isRecording) {
       if (Platform.isAndroid) {
 
-if(listener == null){
-  listener = stream.listen((samples){
-currentSamples=samples;
-resultStream(currentSamples);
+        if (listener == null) {
+          listener = stream.listen((samples) {
+            appendCurrent(samples);
+          },
+          onError: (err){
+            print("error in der Streamsubscription");
+          },
+          cancelOnError: false,
+            onDone: () {
+            print("Streamsubscription fertig??");
 
-  });
+          },
 
 
+          );
 
-
-
-
-
-}else if(listener.isPaused){ //wegen cancel fehler
+        } else if (listener.isPaused) {
+          //wegen cancel fehler
           listener.resume();
         }
-
-      }else if (Platform.isIOS) {  // iOS-specific code -> braucht kein Mensch
-        controller.startAudioStream().listen((samples) => currentSamples = samples);
+        startTime = DateTime.now();
+      } else if (Platform.isIOS) {
+        controller
+            .startAudioStream()
+            .listen((samples) => currentSamples = samples);
       }
       isRecording = true;
-
-
-
-
-    } else if (isRecording == true) {
-
+    } else if (isRecording) {
       if (Platform.isAndroid) {
-      //listener.cancel();  Fehler!!
-        print("currentSamples2");
-        print(currentSamples2);
-       // currentSamples2 = [];
-      listener.pause();
-      }else if (Platform.isIOS) {  // iOS-specific code -> braucht kein Mensch
+        //listener.cancel(); // Fehler!!
+        listener.pause();
+        //listener = null;
+        //listener.pause();
+        //stream = null;
+
+      } else if (Platform.isIOS) {
         deInitAudio();
       }
-
-
       isRecording = false;
       //currentSamples = [];
     }
-
-
-
-
-
-
 
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -197,17 +197,11 @@ resultStream(currentSamples);
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
 
-
-      if(isRecording) status = "running";
-      if(!isRecording) status = "not running";
-      _result = calculate(currentSamples2);
-
-
-    }
-    );
-
-
-
+      if (isRecording) status = "running";
+      if (!isRecording) status = "not running";
+      _result = calculate(finalSamples);
+      finalSamples = [];
+    });
   }
 
   @override
@@ -251,7 +245,6 @@ resultStream(currentSamples);
               '$_result',
               style: Theme.of(context).textTheme.display1,
             ),
-
           ],
         ),
       ),

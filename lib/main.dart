@@ -51,7 +51,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _result;
+  double _result;
   bool isRecording;
   Stream<List<int>> stream;
   StreamSubscription<List<int>> listener;
@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _result = 0;
+    _result = 0.0;
     status = "not running";
     isRecording = false;
     finalSamples = [];
@@ -125,22 +125,24 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
-  int calculate(List<int> finalSamples) {
+  double calculate(List<int> finalSamples) {
     if (finalSamples.isNotEmpty) {
       // finalSamples.sort();
 
       if (finalSamples.reduce(max).abs() >= finalSamples.reduce(min)) {
-        _result = finalSamples.reduce(max).abs();
+        _result = finalSamples.reduce(max).abs().toDouble();
       } else {
-        _result = finalSamples.reduce(min);
+        _result = finalSamples.reduce(min).toDouble();
       }
 
-    }else _result = 0;
+    }else _result = 0.0;
 
     print("laenge= ");
     print(finalSamples.length);
     print("dauer");
     print(finalSamples.length / 44100);
+
+    _result = 20 * log(_result)*log10e;
     return _result;
   }
 

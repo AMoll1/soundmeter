@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mic_stream/mic_stream.dart';
 import 'package:audio_streams/audio_streams.dart';
 import 'dart:io' show Platform;
+import 'package:device_info/device_info.dart';
 
 void main() => runApp(MyApp());
 

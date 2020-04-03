@@ -63,11 +63,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
-  Future appendCurrent(List<int> test) async {
-    //await Future.delayed(Duration(seconds: 1)); //Mock delay
-    for (int i = 0; i < test.length; i++) {
-      finalSamples.add(test[i]);
-    }
+  Future  appendCurrent(List<int> test) async {
+    finalSamples.addAll(test);
   }
 
 
@@ -115,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
+
   @override
   void dispose() {
     listener.cancel();
@@ -127,7 +125,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   double calculate(List<int> finalSamples) {
     if (finalSamples.isNotEmpty) {
-      // finalSamples.sort();
 
       if (finalSamples.reduce(max).abs() >= finalSamples.reduce(min)) {
         _result = finalSamples.reduce(max).abs().toDouble();
@@ -146,65 +143,91 @@ class _MyHomePageState extends State<MyHomePage> {
     return _result;
   }
 
-  void _startMeasurement() {
-    if (!isRecording) {
-      if (Platform.isAndroid) {
 
-        if (listener == null) {
-          listener = stream.listen((samples) {
-            if(isRecording)appendCurrent(samples);
-          },
+  bool changeListening() =>
+      !isRecording ? startListening() : stopListening();
+
+
+
+
+
+  bool startListening(){
+    if (isRecording) return false;
+    if (Platform.isAndroid) {
+      if (listener == null) {
+        finalSamples = [];
+        listener = stream.listen((samples) async {
+          if(isRecording) await appendCurrent(samples);
+        },
           onError: (err){
             print("error in der Streamsubscription");
           },
           cancelOnError: false,
-            onDone: () {
+          onDone: () {
             print("Streamsubscription fertig??");
 
           },
 
 
-          );
+        );
 
-        } else if (listener.isPaused) {
-          //wegen cancel fehler
-          listener.resume();
-        }
-        startTime = DateTime.now();
-      } else if (Platform.isIOS) {
-        controller
-            .startAudioStream()
-            .listen((samples) => currentSamples = samples);
+      } else if (listener.isPaused) {
+        //wegen cancel fehler
+        finalSamples = [];
+        listener.resume();
       }
-      isRecording = true;
-    } else if (isRecording) {
-      if (Platform.isAndroid) {
-        //listener.cancel(); // Fehler!!
-        listener.pause();
-        //listener = null;
-        //listener.pause();
-        //stream = null;
 
-      } else if (Platform.isIOS) {
-        deInitAudio();
-      }
-      isRecording = false;
-      //currentSamples = [];
+
+
+      //IOS
+    } else if (Platform.isIOS) {
+      controller
+          .startAudioStream()
+          .listen((samples) => currentSamples = samples);
     }
 
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-
-      if (isRecording) status = "running";
-      if (!isRecording) status = "not running";
-      _result = calculate(finalSamples);
-      finalSamples = [];
+      isRecording = true;
+      startTime = DateTime.now();
+      status = "running";
+      finalSamples.clear();
     });
+    return true;
   }
+
+
+
+
+
+  bool stopListening(){
+    if (!isRecording) return false;
+    if (Platform.isAndroid) {
+      //listener.cancel(); // Fehler!!
+      listener.pause();
+
+      //listener = null;
+      //listener.pause();
+      //stream = null;
+
+    } else if (Platform.isIOS) {
+      deInitAudio();
+    }
+    isRecording = false;
+    //currentSamples = [];
+
+
+    setState(() {
+      status = "not running";
+      isRecording = false;
+      _result = calculate(finalSamples);
+      finalSamples.clear();
+    });
+    return true;
+  }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +274,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _startMeasurement,
+        onPressed: changeListening,
         tooltip: 'Start',
         child: Icon(Icons.add),
       ),

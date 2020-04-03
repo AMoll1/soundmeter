@@ -26,6 +26,9 @@ class MyApp extends StatelessWidget {
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
         primarySwatch: Colors.pink,
+        canvasColor: const Color(0xFF000000),
+        brightness: Brightness.dark,
+        accentColor: const Color(0xFF4ab312),
       ),
       home: MyHomePage(title: 'Soundmeter'),
     );
@@ -269,28 +272,57 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             Text(
               "Status: "+status,
+              style: new TextStyle(fontSize:30.0,
+                  color: const Color(0xFF56dd1c),
+                  fontWeight: FontWeight.w900,
+                  fontFamily: "Merriweather"),
             ),
             Text(
               '$_result'+" dB",
               style: Theme.of(context).textTheme.display1,
+
             ),
             Text(
               "Os: "+Platform.operatingSystem,
+              style: new TextStyle(fontSize:15.0,
+                  color: const Color(0xFF56dd1c),
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "Merriweather"),
             ),
             Text(
               "OsVersion: "+Platform.operatingSystemVersion,
+              style: new TextStyle(fontSize:15.0,
+                  color: const Color(0xFF56dd1c),
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "Merriweather"),
             ),
             Text(
               "Core count: "+ Platform.numberOfProcessors.toString(),
+              style: new TextStyle(fontSize:15.0,
+                  color: const Color(0xFF56dd1c),
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "Merriweather"),
             ),
             Text(
               "Version: "+Platform.version,
+              style: new TextStyle(fontSize:15.0,
+                  color: const Color(0xFF56dd1c),
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "Merriweather"),
             ),
             Text(
               "locale Name: "+Platform.localeName,
+              style: new TextStyle(fontSize:15.0,
+                  color: const Color(0xFF56dd1c),
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "Merriweather"),
             ),
             Text(
               "Hostname: "+Platform.localHostname,
+              style: new TextStyle(fontSize:15.0,
+                  color: const Color(0xFF56dd1c),
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "Merriweather"),
             ),
           ],
         ),

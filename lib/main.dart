@@ -166,6 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
         finalSamples = [];
         listener = stream.listen((samples) async {
           if(isRecording) await appendCurrent(samples);
+          if(!isRecording) samples = []; //dirty haxx
         },
           onError: (err){
             print("error in der Streamsubscription");

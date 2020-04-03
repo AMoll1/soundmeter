@@ -62,7 +62,6 @@ class _MyHomePageState extends State<MyHomePage> {
   DateTime startTime;
 
 
-
   Future  appendCurrent(List<int> test) async {
     finalSamples.addAll(test);
   }
@@ -75,7 +74,9 @@ class _MyHomePageState extends State<MyHomePage> {
     _result = 0.0;
     status = "not running";
     isRecording = false;
-    finalSamples = [];
+    finalSamples.clear();
+
+
 
     if (Platform.isIOS) {
       controller = new AudioController(CommonFormat.Int16, 44100, 1,
@@ -144,6 +145,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
+
+
+
   bool changeListening() =>
       !isRecording ? startListening() : stopListening();
 
@@ -173,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       } else if (listener.isPaused) {
         //wegen cancel fehler
-        finalSamples = [];
+        finalSamples.clear();
         listener.resume();
       }
 
@@ -264,11 +268,29 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              status,
+              "Status: "+status,
             ),
             Text(
-              '$_result',
+              '$_result'+" dB",
               style: Theme.of(context).textTheme.display1,
+            ),
+            Text(
+              "Os: "+Platform.operatingSystem,
+            ),
+            Text(
+              "OsVersion: "+Platform.operatingSystemVersion,
+            ),
+            Text(
+              "Core count: "+ Platform.numberOfProcessors.toString(),
+            ),
+            Text(
+              "Version: "+Platform.version,
+            ),
+            Text(
+              "locale Name: "+Platform.localeName,
+            ),
+            Text(
+              "Hostname: "+Platform.localHostname,
             ),
           ],
         ),
